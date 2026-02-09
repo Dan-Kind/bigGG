@@ -110,7 +110,7 @@ def error_propagation(a, da,y, dy, d,dd, m2, dm2, L, dL, T, dT):
 if __name__ == '__main__':
     #plot_with_damped_fit(dh1,15)
 
-    names = ["Daniel", "Ariv", "Ruben", "Idris"]
+    names = ["Daniel", "Ariv", "Rumen", "Idris"]
 
     for i in range(4):
         result = error_propagation(
