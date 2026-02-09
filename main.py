@@ -8,12 +8,33 @@ def damped_sine(t, A, gamma, omega, phi, C):
     """Damped sine with constant offset"""
     return A * np.exp(-gamma * t) * np.sin(omega * t + phi) + C
 
+def plot_offset_symmetry(data, dt, C, title="Offset symmetry check"):
+    data = np.asarray(data, dtype=float)
+    t = np.arange(len(data)) * dt
+
+    # Remove offset
+    centered = data - C
+
+    # Flipped version
+    flipped = -centered
+
+    plt.figure()
+    plt.plot(t, centered, 'o', label="Data − offset")
+    plt.plot(t, flipped, 'x', label="Flipped (−1 ×)")
+    plt.axhline(0, color='k', linewidth=0.8, linestyle='--')
+
+    plt.xlabel("Time (s)")
+    plt.ylabel("Displacement (offset removed)")
+    plt.title(title)
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
 
 def plot_with_damped_fit(
     data,
     dt,
-    xlabel="Time",
-    ylabel="Displacement",
+    xlabel="Time (s)",
+    ylabel="Displacement (cm)",
     title=None
 ):
     data = np.asarray(data, dtype=float)
@@ -73,6 +94,7 @@ def plot_with_damped_fit(
     plt.legend()
     plt.tight_layout()
     plt.show()
+    plot_offset_symmetry(data, dt, C)
 
     return params
 
@@ -116,7 +138,7 @@ def calculate_G2(ca,cy,cd,cm2,cL,cT):
     ex = (cd**2+(2/5)*cr**2)
     return (numerator/denominator)*ex
 if __name__ == '__main__':
-    #plot_with_damped_fit(dh1,15)
+    plot_with_damped_fit(i2,15)
 
     names = ["Daniel", "Ariv", "Rumen", "Idris"]
     G2_s = []
@@ -154,3 +176,14 @@ if __name__ == '__main__':
         DG2_s.append(current_G2_error)
     print("=" * 50)
     print(f"{"weighted errors:":^50}")
+    G_avg = 0
+
+
+    sum_DG2 = 0
+    for i in range (4):
+
+        G_avg += G2_s[i]/DG2_s[i]**2
+        sum_DG2 += 1/DG2_s[i]**2
+    G_avg = G_avg/sum_DG2
+    SG = np.sqrt(1/sum_DG2)
+    print(f"  G2   = {G_avg:>10}   ± {SG}")
