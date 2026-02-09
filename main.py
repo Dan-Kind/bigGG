@@ -106,7 +106,15 @@ def error_propagation(a, da,y, dy, d,dd, m2, dm2, L, dL, T, dT):
    G= 6.67430 * 10**-11
    return G * np.sqrt((2 * da/a)**2 + (dy/y)**2 + (dd/d)**2 + (dm2/m2)**2 + (dL/L)**2 + (2*dT/T)**2)
 
-
+def calculate_G2(ca,cy,cd,cm2,cL,cT):
+    cr = r
+    theta = 1/2*np.arctan(cy/cL)
+    s = cd*np.sin(theta)
+    beta = (ca*(ca-s)**2)/((ca**2+(4*cd**2))**(3/2))
+    numerator = 4*(np.pi**2)*(ca-s)**2*theta
+    denominator = cd*(1-beta)*cT**2*cm2
+    ex = (cd**2+(2/5)*cr**2)
+    return (numerator/denominator)*ex
 if __name__ == '__main__':
     #plot_with_damped_fit(dh1,15)
 
@@ -121,6 +129,7 @@ if __name__ == '__main__':
             L[i], dL[i],
             T[i], dT[i]
         )
+        current_G2 = calculate_G2( a[i], y[i], d, m2,L[i],T[i])
 
         print("=" * 50)
         print(f"{names[i]:^50}")  # centered name
@@ -136,4 +145,5 @@ if __name__ == '__main__':
 
         print("\nResult:")
         print(f"  Absolute error = {result:.6e}")
-
+        print("\nBIG G:")
+        print(f"  G_2 = {current_G2:.6e}")
