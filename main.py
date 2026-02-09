@@ -110,7 +110,7 @@ def calculate_G2(ca,cy,cd,cm2,cL,cT):
     cr = r
     theta = 1/2*np.arctan(cy/cL)
     s = cd*np.sin(theta)
-    beta = (ca*(ca-s)**2)/((ca**2+(4*cd**2))**(3/2))
+    beta = (ca*(ca-s)**2)/((ca**2+(4*(cd**2)))**(3/2))
     numerator = 4*(np.pi**2)*(ca-s)**2*theta
     denominator = cd*(1-beta)*cT**2*cm2
     ex = (cd**2+(2/5)*cr**2)
@@ -119,9 +119,10 @@ if __name__ == '__main__':
     #plot_with_damped_fit(dh1,15)
 
     names = ["Daniel", "Ariv", "Rumen", "Idris"]
-
+    G2_s = []
+    DG2_s = []
     for i in range(4):
-        result = error_propagation(
+        current_G2_error = error_propagation(
             a[i], da[i],
             y[i], dy[i],
             d, dd,
@@ -144,6 +145,12 @@ if __name__ == '__main__':
         print(f"  T   = {T[i]:>10}   ± {dT[i]}")
 
         print("\nResult:")
-        print(f"  Absolute error = {result:.6e}")
+        print(f"  Absolute error = {current_G2_error:.6e}")
         print("\nBIG G:")
         print(f"  G_2 = {current_G2:.6e}")
+
+        #Save
+        G2_s.append(current_G2)
+        DG2_s.append(current_G2_error)
+    print("=" * 50)
+    print(f"{"weighted errors:":^50}")
