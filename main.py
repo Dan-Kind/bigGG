@@ -8,7 +8,7 @@ def damped_sine(t, A, gamma, omega, phi, C):
     """Damped sine with constant offset"""
     return A * np.exp(-gamma * t) * np.sin(omega * t + phi) + C
 
-def plot_offset_symmetry(data, dt, C, title="Offset symmetry check"):
+def plot_offset_symmetry(data, dt, C, gamma, A, title="Offset symmetry check"):
     data = np.asarray(data, dtype=float)
     t = np.arange(len(data)) * dt
 
@@ -21,6 +21,14 @@ def plot_offset_symmetry(data, dt, C, title="Offset symmetry check"):
     plt.figure()
     plt.plot(t, centered, 'o', label="Data − offset")
     plt.plot(t, flipped, 'x', label="Flipped (−1 ×)")
+    #Plotting the e^gamma t
+
+    # ---- smooth curve for plotting ----
+    t_fit = np.linspace(t[0], t[-1], 2000)
+    y1_fit = np.exp(-gamma * t_fit)*A
+    y2_fit = np.exp(-gamma * t_fit)*-A
+    plt.plot(t_fit, y1_fit , label ="Upper Bound")
+    plt.plot(t_fit, y2_fit, label ="Lower Bound")
     plt.axhline(0, color='k', linewidth=0.8, linestyle='--')
 
     plt.xlabel("Time (s)")
@@ -79,6 +87,7 @@ def plot_with_damped_fit(
     print(f"Error: Angular freq ω  = {omega_err:.6f}")
     print(f"Error: Phase φ         = {phi_err:.6f}")
     print(f"Error: Offset C        = {C_err:.6f}")
+
     # ---- smooth curve for plotting ----
     t_fit = np.linspace(t[0], t[-1], 2000)
     y_fit = damped_sine(t_fit, *params)
@@ -94,7 +103,9 @@ def plot_with_damped_fit(
     plt.legend()
     plt.tight_layout()
     plt.show()
-    plot_offset_symmetry(data, dt, C)
+
+    #Plot with offset symmetry for optional check of systematic angle error.
+    plot_offset_symmetry(data, dt, C, gamma, A)
 
     return params
 
