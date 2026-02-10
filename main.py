@@ -135,19 +135,20 @@ def data_averager(l1, l2):
     else:
         return [int(((i+j)/2)*1000)/1000 for i, j in zip(l1, l2)]
 
-def error_propagation(ca, dca,y, dy, d,dd, m2, dm2, L, dL, T, dT, current_G2):
+def error_propagation(ca, dca, cy, dcy, cd,dd, m2, dm2, cL, dcL, cT, dcT, current_G2):
    G= 6.67430 * 10**-11
+   G1 = calculate_G1(ca, cy, d, m2, cL, cT)
+   dG1 = G1 * np.sqrt((2 * dca/ca)**2 + (dcy/cy)**2 + (dd/d)**2 + (dm2/m2)**2 + (dcL/cL)**2 + (2*dcT/cT)**2)
 
-   dG1 = G * np.sqrt((2 * dca/ca)**2 + (dy/y)**2 + (dd/d)**2 + (dm2/m2)**2 + (dL/L)**2 + (2*dT/T)**2)
-   theta = 1 / 2 * np.arctan(y / L)
+   theta = 1 / 2 * np.arctan(cy / cL)
    s = d * np.sin(theta)
    beta = (ca * (ca - s) ** 2) / ((ca ** 2 + (4 * (d ** 2))) ** (3 / 2))
-   ds = s * np.sqrt((dy / y)**2 + (dL / L)**2 + (dd / d)**2)
+   ds = s * np.sqrt((dcy / cy)**2 + (dcL / cL)**2 + (dd / d)**2)
    dBeta = beta * np.sqrt((dca/ca)**2+ ((dca)**2+(ds)**2)/((ca-s)**2) + (((2*ca*dca)**2 + (8*d*dd)**2)**(3/2))/(ca**2+4*d**2)**3)
-   G1 = calculate_G1(ca,y,d,m2,L,T)
 
-   print(np.sqrt((dG1/G1)**2 + (dBeta/beta)**2))
-   dG2 = current_G2 * np.sqrt((dG1/G1)**2 + (dBeta/beta)**2)
+
+   print(np.sqrt((dG1/G1)**2 ))
+   dG2 = current_G2 * np.sqrt((dG1/G1)**2 + ((dBeta)/(beta))**2)
    return dG2
 
 
@@ -166,7 +167,7 @@ def calculate_G2(ca,cy,cd,cm2,cL,cT):
     ex = (cd**2+(2/5)*cr**2)
     return (numerator/denominator)*ex
 if __name__ == '__main__':
-    #plot_with_damped_fit(i2,15)
+    plot_with_damped_fit(i2,15)
 
     names = ["Daniel", "Ariv", "Rumen", "Idris"]
     G2_s = []
@@ -210,7 +211,7 @@ if __name__ == '__main__':
 
 
     sum_DG2 = 0
-    for i in range (4):
+    for i in range(4):
 
         G_avg += G2_s[i]/DG2_s[i]**2
         sum_DG2 += 1/DG2_s[i]**2
