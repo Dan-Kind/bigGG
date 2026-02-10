@@ -135,10 +135,27 @@ def data_averager(l1, l2):
     else:
         return [int(((i+j)/2)*1000)/1000 for i, j in zip(l1, l2)]
 
-def error_propagation(a, da,y, dy, d,dd, m2, dm2, L, dL, T, dT):
+def error_propagation(ca, dca,y, dy, d,dd, m2, dm2, L, dL, T, dT, current_G2):
    G= 6.67430 * 10**-11
-   return G * np.sqrt((2 * da/a)**2 + (dy/y)**2 + (dd/d)**2 + (dm2/m2)**2 + (dL/L)**2 + (2*dT/T)**2)
 
+   dG1 = G * np.sqrt((2 * dca/ca)**2 + (dy/y)**2 + (dd/d)**2 + (dm2/m2)**2 + (dL/L)**2 + (2*dT/T)**2)
+   theta = 1 / 2 * np.arctan(y / L)
+   s = d * np.sin(theta)
+   beta = (ca * (ca - s) ** 2) / ((ca ** 2 + (4 * (d ** 2))) ** (3 / 2))
+   ds = s * np.sqrt((dy / y)**2 + (dL / L)**2 + (dd / d)**2)
+   dBeta = beta * np.sqrt((dca/ca)**2+ ((dca)**2+(ds)**2)/((ca-s)**2) + (((2*ca*dca)**2 + (8*d*dd)**2)**(3/2))/(ca**2+4*d**2)**3)
+   G1 = calculate_G1(ca,y,d,m2,L,T)
+
+   print(np.sqrt((dG1/G1)**2 + (dBeta/beta)**2))
+   dG2 = current_G2 * np.sqrt((dG1/G1)**2 + (dBeta/beta)**2)
+   return dG2
+
+
+def calculate_G1(ca,cy,cd,cm2,cL,cT):
+    theta = 1 / 2 * np.arctan(cy / cL)
+    s = cd * np.sin(theta)
+    R = ca - s
+    return (4*np.pi**2*R**2*theta)/(2*cd*cT**2*cm2*m1)
 def calculate_G2(ca,cy,cd,cm2,cL,cT):
     cr = r
     theta = 1/2*np.arctan(cy/cL)
@@ -149,21 +166,23 @@ def calculate_G2(ca,cy,cd,cm2,cL,cT):
     ex = (cd**2+(2/5)*cr**2)
     return (numerator/denominator)*ex
 if __name__ == '__main__':
-    plot_with_damped_fit(i2,15)
+    #plot_with_damped_fit(i2,15)
 
     names = ["Daniel", "Ariv", "Rumen", "Idris"]
     G2_s = []
     DG2_s = []
     for i in range(4):
+        current_G2 = calculate_G2(a[i], y[i], d, m2, L[i], T[i])
+
         current_G2_error = error_propagation(
             a[i], da[i],
             y[i], dy[i],
             d, dd,
             m2, dm2,
             L[i], dL[i],
-            T[i], dT[i]
+            T[i], dT[i],
+            current_G2
         )
-        current_G2 = calculate_G2( a[i], y[i], d, m2,L[i],T[i])
 
         print("=" * 50)
         print(f"{names[i]:^50}")  # centered name
